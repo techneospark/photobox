@@ -134,7 +134,14 @@
         width: 100%;
         display: flex;
         justify-content: center;
+        align-items: center;
         margin-top: 20px;
+        padding: 10px 0; 
+      }
+      .download-container .button {
+        width: 100%;
+        max-width: 1000px; 
+        text-align: center;
       }
       .button {
         border: none;
@@ -152,10 +159,43 @@
       .button:active {
         transform: scale(0.95);
       }
+      .color-picker {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .color-picker label {
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .name-input {
+        margin-top: 10px;
+        font-size: 16px;
+      }
+      .name-input input {
+        padding: 5px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      #reset-btn {
+        margin-top: 10px;
+        background: #ff5733;
+        color: white;
+      }
+      #reset-btn:hover {
+        background: #e64a19;
+      }
     </style>
+    
   </head>
   <body>
     <div class="header">📸 Photobox</div>
+    <div class="name-input">
+      <label for="user-name">Nama:</label>
+      <input type="text" id="user-name" placeholder="Masukkan nama Anda" />
+    </div>
 
     <div class="container">
       <div class="camera-container">
@@ -174,6 +214,11 @@
           <div class="photo-container" id="photo-container"></div>
         </div>
         <div class="right-panel">
+          <div class="color-picker">
+            <label for="frame-color">Warna Frame:</label>
+            <input type="color" id="frame-color" value="#ffffff" />
+          </div>
+        
           <div class="template-container">
             <div
               class="template strip-3"
@@ -183,6 +228,9 @@
             >
               <img class="logo" src="techneospark.png" alt="Logo" />
             </div>
+          </div>
+          <button id="reset-btn" class="button">Change Photos</button>
+        </div>
           </div>
         </div>
       </div>
@@ -196,21 +244,28 @@
         />
       </button>
     </div>
-
+    
     <script>
       const video = document.getElementById("video");
       const startBtn = document.getElementById("start-btn");
       const photoContainer = document.getElementById("photo-container");
       const template3 = document.getElementById("template-3");
       const downloadBtn = document.getElementById("download-btn");
-
+      const frameColorInput = document.getElementById("frame-color");
+      frameColorInput.addEventListener("input", (event) => {
+        template3.style.backgroundColor = event.target.value;
+      });
+      const resetBtn = document.getElementById("reset-btn");
+      resetBtn.addEventListener("click", () => {
+        const templateImages = template3.querySelectorAll("img:not(.logo)");
+        templateImages.forEach((img) => img.remove());
+      });
       navigator.mediaDevices
         .getUserMedia({ video: true })
         .then((stream) => {
           video.srcObject = stream;
         })
         .catch((err) => console.error("Error accessing webcam:", err));
-
       startBtn.addEventListener("click", () => {
         photoContainer.innerHTML = "";
         let captureCount = 0;
@@ -223,60 +278,64 @@
           }
         }, 3000);
       });
-
       function captureImage() {
-  let canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  let ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
-  let img = document.createElement("img");
-  img.src = canvas.toDataURL("image/png");
-  
-  // Gantilah drag-and-drop dengan click event
-  img.addEventListener("click", () => addToTemplate(img.src));
+        let canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  let photoBox = document.createElement("div");
-  photoBox.classList.add("photo-box");
-  photoBox.appendChild(img);
-  photoContainer.appendChild(photoBox);
+        let img = document.createElement("img");
+        img.src = canvas.toDataURL("image/png");
+
+        img.addEventListener("click", () => addToTemplate(img.src));
+
+        let photoBox = document.createElement("div");
+        photoBox.classList.add("photo-box");
+        photoBox.appendChild(img);
+        photoContainer.appendChild(photoBox);
+      }
+      function addToTemplate(imgSrc) {
+  let template = document.getElementById("template-3");
+  let imgCount = template.querySelectorAll("img:not(.logo)").length;
+
+  if (imgCount < 3) {
+    let img = document.createElement("img");
+    img.src = imgSrc;
+    template.insertBefore(img, template.querySelector(".logo"));
+  } else {
+    alert("Maksimal 3 foto dalam template!");
+  }
 }
-
-function addToTemplate(imgSrc) {
-  let img = document.createElement("img");
-  img.src = imgSrc;
-  document
-    .getElementById("template-3")
-    .insertBefore(img, document.getElementById("template-3").querySelector(".logo"));
-}
-
-
       function allowDrop(event) {
         event.preventDefault();
       }
-
       function drop(event, templateId) {
-        event.preventDefault();
-        let imgSrc = event.dataTransfer.getData("text");
-        let img = document.createElement("img");
-        img.src = imgSrc;
-        document
-          .getElementById(templateId)
-          .insertBefore(
-            img,
-            document.getElementById(templateId).querySelector(".logo")
-          );
-      }
+  event.preventDefault();
+  let template = document.getElementById(templateId);
+  let imgCount = template.querySelectorAll("img:not(.logo)").length;
 
+  if (imgCount < 3) {
+    let imgSrc = event.dataTransfer.getData("text");
+    let img = document.createElement("img");
+    img.src = imgSrc;
+    template.insertBefore(img, template.querySelector(".logo"));
+  } else {
+    alert("Maksimal 3 foto dalam template!");
+  }
+}
       downloadBtn.addEventListener("click", () => {
+        const userName = document.getElementById("user-name").value.trim();
+        const date = new Date().toISOString().split("T")[0];
+        const fileName = userName ? `${userName}-${date}.png` : `photobox-${date}.png`;
+
         html2canvas(template3).then((canvas) => {
           const link = document.createElement("a");
           link.href = canvas.toDataURL("image/png");
-          link.download = "photobox.png";
+          link.download = fileName;
           link.click();
         });
       });
     </script>
-  </body>
+  </body>
 </html>
