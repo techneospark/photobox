@@ -225,21 +225,32 @@
       });
 
       function captureImage() {
-        let canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        let ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        let img = document.createElement("img");
-        img.src = canvas.toDataURL("image/png");
-        img.draggable = true;
-        img.ondragstart = (event) =>
-          event.dataTransfer.setData("text", event.target.src);
-        let photoBox = document.createElement("div");
-        photoBox.classList.add("photo-box");
-        photoBox.appendChild(img);
-        photoContainer.appendChild(photoBox);
-      }
+  let canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  let ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+  let img = document.createElement("img");
+  img.src = canvas.toDataURL("image/png");
+  
+  // Gantilah drag-and-drop dengan click event
+  img.addEventListener("click", () => addToTemplate(img.src));
+
+  let photoBox = document.createElement("div");
+  photoBox.classList.add("photo-box");
+  photoBox.appendChild(img);
+  photoContainer.appendChild(photoBox);
+}
+
+function addToTemplate(imgSrc) {
+  let img = document.createElement("img");
+  img.src = imgSrc;
+  document
+    .getElementById("template-3")
+    .insertBefore(img, document.getElementById("template-3").querySelector(".logo"));
+}
+
 
       function allowDrop(event) {
         event.preventDefault();
