@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Photobox</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.6/jscolor.min.js"></script>
-
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -223,7 +221,7 @@
         <div class="right-panel">
           <div class="color-picker">
             <label for="frame-color">Warna Frame:</label>
-            <input class="jscolor" id="frame-color" value="ffffff">
+            <input type="color" id="frame-color" value="#ffffff" />
           </div>
         
           <div class="template-container">
@@ -259,8 +257,8 @@
       const template3 = document.getElementById("template-3");
       const downloadBtn = document.getElementById("download-btn");
       const frameColorInput = document.getElementById("frame-color");
-      document.getElementById("frame-color").addEventListener("input", function() {
-        template3.style.backgroundColor = "#" + this.value;
+      frameColorInput.addEventListener("input", (event) => {
+        template3.style.backgroundColor = event.target.value;
       });
       const resetBtn = document.getElementById("reset-btn");
 
