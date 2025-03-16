@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Photobox</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.6/jscolor.min.js"></script>
+
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -136,13 +138,15 @@
         justify-content: center;
         align-items: center;
         margin-top: 20px;
-        padding: 10px 0; 
+        padding: 10px 0; /* Tambahkan padding atas & bawah */
       }
       .download-container .button {
         width: 100%;
-        max-width: 1000px; 
+        max-width: 1000px; /* Sesuaikan ukuran */
         text-align: center;
       }
+
+
       .button {
         border: none;
         padding: 12px 20px;
@@ -165,6 +169,7 @@
         align-items: center;
         gap: 10px;
       }
+
       .color-picker label {
         font-size: 16px;
         font-weight: bold;
@@ -173,6 +178,7 @@
         margin-top: 10px;
         font-size: 16px;
       }
+
       .name-input input {
         padding: 5px;
         font-size: 16px;
@@ -184,11 +190,12 @@
         background: #ff5733;
         color: white;
       }
+
       #reset-btn:hover {
         background: #e64a19;
       }
+
     </style>
-    
   </head>
   <body>
     <div class="header">📸 Photobox</div>
@@ -216,7 +223,7 @@
         <div class="right-panel">
           <div class="color-picker">
             <label for="frame-color">Warna Frame:</label>
-            <input type="color" id="frame-color" value="#ffffff" />
+            <input class="jscolor" id="frame-color" value="ffffff">
           </div>
         
           <div class="template-container">
@@ -244,7 +251,7 @@
         />
       </button>
     </div>
-    
+
     <script>
       const video = document.getElementById("video");
       const startBtn = document.getElementById("start-btn");
@@ -252,20 +259,23 @@
       const template3 = document.getElementById("template-3");
       const downloadBtn = document.getElementById("download-btn");
       const frameColorInput = document.getElementById("frame-color");
-      frameColorInput.addEventListener("input", (event) => {
-        template3.style.backgroundColor = event.target.value;
+      document.getElementById("frame-color").addEventListener("input", function() {
+        template3.style.backgroundColor = "#" + this.value;
       });
       const resetBtn = document.getElementById("reset-btn");
+
       resetBtn.addEventListener("click", () => {
-        const templateImages = template3.querySelectorAll("img:not(.logo)");
-        templateImages.forEach((img) => img.remove());
+        const templateImages = template3.querySelectorAll("img:not(.logo)"); // Ambil semua gambar kecuali logo
+        templateImages.forEach((img) => img.remove()); // Hapus semua gambar dalam frame
       });
+
       navigator.mediaDevices
         .getUserMedia({ video: true })
         .then((stream) => {
           video.srcObject = stream;
         })
         .catch((err) => console.error("Error accessing webcam:", err));
+
       startBtn.addEventListener("click", () => {
         photoContainer.innerHTML = "";
         let captureCount = 0;
@@ -278,6 +288,7 @@
           }
         }, 3000);
       });
+
       function captureImage() {
         let canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
@@ -288,6 +299,7 @@
         let img = document.createElement("img");
         img.src = canvas.toDataURL("image/png");
 
+        // Gantilah drag-and-drop dengan click event
         img.addEventListener("click", () => addToTemplate(img.src));
 
         let photoBox = document.createElement("div");
@@ -295,6 +307,7 @@
         photoBox.appendChild(img);
         photoContainer.appendChild(photoBox);
       }
+
       function addToTemplate(imgSrc) {
   let template = document.getElementById("template-3");
   let imgCount = template.querySelectorAll("img:not(.logo)").length;
@@ -307,9 +320,12 @@
     alert("Maksimal 3 foto dalam template!");
   }
 }
+
+
       function allowDrop(event) {
         event.preventDefault();
       }
+
       function drop(event, templateId) {
   event.preventDefault();
   let template = document.getElementById(templateId);
@@ -324,9 +340,10 @@
     alert("Maksimal 3 foto dalam template!");
   }
 }
+
       downloadBtn.addEventListener("click", () => {
         const userName = document.getElementById("user-name").value.trim();
-        const date = new Date().toISOString().split("T")[0];
+        const date = new Date().toISOString().split("T")[0]; // Format YYYY-MM-DD
         const fileName = userName ? `${userName}-${date}.png` : `photobox-${date}.png`;
 
         html2canvas(template3).then((canvas) => {
@@ -336,6 +353,8 @@
           link.click();
         });
       });
+
     </script>
+     
   </body>
 </html>
