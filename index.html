@@ -122,12 +122,6 @@
         background: lightgray;
         border-radius: 5px;
       }
-      .dropped-img {
-        width: 157px;
-        height: 118px;
-        object-fit: cover;
-        border-radius: 5px;
-      }
       .logo {
         width: 50px;
         height: auto;
@@ -207,6 +201,8 @@
       const video = document.getElementById("video");
       const startBtn = document.getElementById("start-btn");
       const photoContainer = document.getElementById("photo-container");
+      const template3 = document.getElementById("template-3");
+      const downloadBtn = document.getElementById("download-btn");
 
       navigator.mediaDevices
         .getUserMedia({ video: true })
@@ -217,9 +213,15 @@
 
       startBtn.addEventListener("click", () => {
         photoContainer.innerHTML = "";
-        for (let i = 0; i < 6; i++) {
-          setTimeout(captureImage, i * 1000);
-        }
+        let captureCount = 0;
+        let captureInterval = setInterval(() => {
+          if (captureCount < 6) {
+            captureImage();
+            captureCount++;
+          } else {
+            clearInterval(captureInterval);
+          }
+        }, 3000);
       });
 
       function captureImage() {
@@ -228,13 +230,11 @@
         canvas.height = video.videoHeight;
         let ctx = canvas.getContext("2d");
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
         let img = document.createElement("img");
         img.src = canvas.toDataURL("image/png");
         img.draggable = true;
-        img.id = "photo-" + Date.now();
-        img.ondragstart = (event) => event.dataTransfer.setData("text", img.id);
-
+        img.ondragstart = (event) =>
+          event.dataTransfer.setData("text", event.target.src);
         let photoBox = document.createElement("div");
         photoBox.classList.add("photo-box");
         photoBox.appendChild(img);
@@ -247,13 +247,25 @@
 
       function drop(event, templateId) {
         event.preventDefault();
-        let imgId = event.dataTransfer.getData("text");
-        let draggedImg = document.getElementById(imgId).cloneNode(true);
-        draggedImg.classList.add("dropped-img");
+        let imgSrc = event.dataTransfer.getData("text");
+        let img = document.createElement("img");
+        img.src = imgSrc;
         document
           .getElementById(templateId)
-          .insertBefore(draggedImg, document.querySelector(".logo"));
+          .insertBefore(
+            img,
+            document.getElementById(templateId).querySelector(".logo")
+          );
       }
+
+      downloadBtn.addEventListener("click", () => {
+        html2canvas(template3).then((canvas) => {
+          const link = document.createElement("a");
+          link.href = canvas.toDataURL("image/png");
+          link.download = "photobox.png";
+          link.click();
+        });
+      });
     </script>
-  </body>
+  </body>
 </html>
